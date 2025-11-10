@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "416382625901",
+    "project_id": "classify-26e2c",
+    "storage_bucket": "classify-26e2c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:416382625901:android:6bada4e7ccf0ae70d23764",
+        "android_client_info": {
+          "package_name": "com.maizer.Classify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "416382625901-945q4rsg109fkuoj2onef5ncfoofudrd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN69sBBCaQFiUix-5pxzQE838ZnxyE7Yk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "416382625901-945q4rsg109fkuoj2onef5ncfoofudrd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
