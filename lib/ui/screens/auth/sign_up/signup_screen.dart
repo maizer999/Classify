@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/ui/screens/auth/sign_up/email_verification_screen.dart';
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 import 'package:eClassify/ui/screens/widgets/skip_button_widget.dart';
 import 'package:eClassify/ui/theme/theme.dart';
@@ -12,12 +11,10 @@ import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/cloud_state/cloud_state.dart';
 import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/custom_text.dart';
-import 'package:eClassify/utils/error_filter.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -68,15 +65,16 @@ class _SignupScreenState extends CloudState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _emailController.text = widget.emailId!;
+    _emailController.text = widget.emailId ?? "";
     return SafeArea(
       top: false,
       bottom: Platform.isIOS,
       child: AnnotatedRegion(
         value: UiUtils.getSystemUiOverlayStyle(
-            context: context,
-            statusBarColor: context.color.backgroundColor,
-            navigationBarColor: context.color.backgroundColor),
+          context: context,
+          statusBarColor: context.color.backgroundColor,
+          navigationBarColor: context.color.backgroundColor,
+        ),
         child: Scaffold(
           backgroundColor: context.color.backgroundColor,
           bottomNavigationBar: termAndPolicyTxt(),
@@ -84,32 +82,15 @@ class _SignupScreenState extends CloudState<SignupScreen> {
             listener: (context, state) {
               if (state is AuthenticationSuccess) {
                 if (state.type == AuthenticationType.email) {
-                  if (!state.credential.user!.emailVerified) {
-                    FirebaseAuth.instance.currentUser?.sendEmailVerification();
-
-                    Navigator.push<dynamic>(context, MaterialPageRoute(
-                      builder: (context) {
-                        return EmailVerificationScreen(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                        );
-                      },
-                    ));
-                  }
+                  // Directly navigate to main screen after signup
+                  HelperUtils.killPreviousPages(context, Routes.main,
+                      {"from": "signup", "isSkipped": false});
                 }
               }
 
               if (state is AuthenticationFail) {
-                if (state.errorKey is FirebaseAuthException) {
-                  final error = state.errorKey as FirebaseAuthException;
-                  HelperUtils.showSnackBarMessage(
-                      context,
-                      ErrorFilter.getTranslatedFirebaseAuthException(context,
-                          error: error));
-                } else {
-                  HelperUtils.showSnackBarMessage(
-                      context, state.errorKey.toString());
-                }
+                HelperUtils.showSnackBarMessage(
+                    context, state.errorKey.toString());
               }
             },
             builder: (context, state) {
@@ -117,10 +98,10 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                 key: _formKey,
                 child: SingleChildScrollView(
                   padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                   child: Padding(
                     padding:
-                        const EdgeInsets.only(left: 18.0, right: 18, top: 23),
+                    const EdgeInsets.only(left: 18.0, right: 18, top: 23),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -130,25 +111,19 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                                 {"from": "login", "isSkipped": true});
                           },
                         ),
-                        const SizedBox(
-                          height: 66,
-                        ),
+                        const SizedBox(height: 66),
                         CustomText(
                           "welcome".translate(context),
                           fontSize: context.font.extraLarge,
                         ),
-                        const SizedBox(
-                          height: 8,
-                        ),
+                        const SizedBox(height: 8),
                         CustomText(
                           "signUpToeClassify".translate(context),
                           fontSize: context.font.large,
                           color: context.color.textColorDark
                               .withValues(alpha: 0.7),
                         ),
-                        const SizedBox(
-                          height: 24,
-                        ),
+                        const SizedBox(height: 24),
                         CustomTextFormField(
                           controller: _emailController,
                           isReadOnly: true,
@@ -158,17 +133,16 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                           borderColor: context.color.textLightColor
                               .withValues(alpha: 0.3),
                         ),
-                        const SizedBox(
-                          height: 14,
-                        ),
+                        const SizedBox(height: 14),
                         CustomTextFormField(
                           controller: _passwordController,
                           fillColor: context.color.secondaryColor,
                           obscureText: isObscure,
                           suffix: IconButton(
                             onPressed: () {
-                              isObscure = !isObscure;
-                              setState(() {});
+                              setState(() {
+                                isObscure = !isObscure;
+                              });
                             },
                             icon: Icon(
                               !isObscure
@@ -183,37 +157,30 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                           borderColor: context.color.textLightColor
                               .withValues(alpha: 0.3),
                         ),
-                        const SizedBox(
-                          height: 36,
+                        const SizedBox(height: 36),
+                        UiUtils.buildButton(
+                          context,
+                          onPressed: onTapSignup,
+                          buttonTitle: "signUp".translate(context),
+                          radius: 10,
+                          disabled: false,
+                          height: 46,
+                          disabledColor:
+                          const Color.fromARGB(255, 104, 102, 106),
                         ),
-                        UiUtils.buildButton(context,
-                            onPressed: onTapSignup,
-                            buttonTitle:
-                                "verifyEmailAddress".translate(context),
-                            radius: 10,
-                            disabled: false,
-                            height: 46,
-                            disabledColor:
-                                const Color.fromARGB(255, 104, 102, 106)),
-                        const SizedBox(
-                          height: 36,
-                        ),
+                        const SizedBox(height: 36),
                         if (Constant.mobileAuthentication == "1") mobileAuth(),
                         if (Constant.googleAuthentication == "1" ||
                             Constant.appleAuthentication == "1")
                           googleAndAppleAuth(),
-                        const SizedBox(
-                          height: 24,
-                        ),
+                        const SizedBox(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             CustomText("alreadyHaveAcc".translate(context),
                                 color: context.color.textColorDark
                                     .withValues(alpha: 0.7)),
-                            const SizedBox(
-                              width: 12,
-                            ),
+                            const SizedBox(width: 12),
                             GestureDetector(
                               onTap: () {
                                 Navigator.pushReplacementNamed(
@@ -227,9 +194,7 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                             )
                           ],
                         ),
-                        const SizedBox(
-                          height: 24,
-                        ),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -248,9 +213,7 @@ class _SignupScreenState extends CloudState<SignupScreen> {
       children: [
         CustomText("signupWithLbl".translate(context),
             color: context.color.textColorDark.withValues(alpha: 0.7)),
-        const SizedBox(
-          width: 5,
-        ),
+        const SizedBox(width: 5),
         GestureDetector(
           onTap: () {
             Navigator.pushNamed(context, Routes.signupMainScreen);
@@ -269,57 +232,52 @@ class _SignupScreenState extends CloudState<SignupScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(
-          height: 24,
-        ),
+        const SizedBox(height: 24),
         if (Constant.googleAuthentication == "1")
           UiUtils.buildButton(context,
               prefixWidget: Padding(
-                padding: EdgeInsetsDirectional.only(end: 10.0),
+                padding: const EdgeInsetsDirectional.only(end: 10.0),
                 child:
-                    UiUtils.getSvg(AppIcons.googleIcon, width: 22, height: 22),
+                UiUtils.getSvg(AppIcons.googleIcon, width: 22, height: 22),
               ),
               showElevation: false,
               buttonColor: secondaryColor_,
               border: !context.read<AppThemeCubit>().isDarkMode()
                   ? BorderSide(
-                      color:
-                          context.color.textDefaultColor.withValues(alpha: 0.5))
+                  color:
+                  context.color.textDefaultColor.withValues(alpha: 0.5))
                   : null,
               textColor: textDarkColor, onPressed: () {
-            context.read<AuthenticationCubit>().setData(
-                payload: GoogleLoginPayload(), type: AuthenticationType.google);
-            context.read<AuthenticationCubit>().authenticate();
-          },
+                context.read<AuthenticationCubit>().setData(
+                    payload: GoogleLoginPayload(), type: AuthenticationType.google);
+                context.read<AuthenticationCubit>().authenticate();
+              },
               radius: 8,
               height: 46,
               buttonTitle: "continueWithGoogle".translate(context)),
         if (Constant.appleAuthentication == "1" && Platform.isIOS) ...[
-          const SizedBox(
-            height: 12,
-          ),
-          if (Platform.isIOS)
-            UiUtils.buildButton(context,
-                prefixWidget: Padding(
-                  padding: EdgeInsetsDirectional.only(end: 10.0),
-                  child:
-                      UiUtils.getSvg(AppIcons.appleIcon, width: 22, height: 22),
-                ),
-                showElevation: false,
-                buttonColor: secondaryColor_,
-                border: !context.read<AppThemeCubit>().isDarkMode()
-                    ? BorderSide(
-                        color: context.color.textDefaultColor
-                            .withValues(alpha: 0.5))
-                    : null,
-                textColor: textDarkColor, onPressed: () {
-              context.read<AuthenticationCubit>().setData(
-                  payload: AppleLoginPayload(), type: AuthenticationType.apple);
-              context.read<AuthenticationCubit>().authenticate();
-            },
-                height: 46,
-                radius: 8,
-                buttonTitle: "continueWithApple".translate(context)),
+          const SizedBox(height: 12),
+          UiUtils.buildButton(context,
+              prefixWidget: Padding(
+                padding: const EdgeInsetsDirectional.only(end: 10.0),
+                child:
+                UiUtils.getSvg(AppIcons.appleIcon, width: 22, height: 22),
+              ),
+              showElevation: false,
+              buttonColor: secondaryColor_,
+              border: !context.read<AppThemeCubit>().isDarkMode()
+                  ? BorderSide(
+                  color: context.color.textDefaultColor
+                      .withValues(alpha: 0.5))
+                  : null,
+              textColor: textDarkColor, onPressed: () {
+                context.read<AuthenticationCubit>().setData(
+                    payload: AppleLoginPayload(), type: AuthenticationType.apple);
+                context.read<AuthenticationCubit>().authenticate();
+              },
+              height: 46,
+              radius: 8,
+              buttonTitle: "continueWithApple".translate(context)),
         ]
       ],
     );
@@ -327,7 +285,8 @@ class _SignupScreenState extends CloudState<SignupScreen> {
 
   Widget termAndPolicyTxt() {
     return Padding(
-      padding: EdgeInsetsDirectional.only(bottom: 15.0, start: 25.0, end: 25.0),
+      padding: const EdgeInsetsDirectional.only(
+          bottom: 15.0, start: 25.0, end: 25.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.min,
@@ -336,9 +295,7 @@ class _SignupScreenState extends CloudState<SignupScreen> {
               color: context.color.textLightColor.withValues(alpha: 0.8),
               fontSize: context.font.small,
               textAlign: TextAlign.center),
-          const SizedBox(
-            height: 3,
-          ),
+          const SizedBox(height: 3),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             InkWell(
                 child: CustomText(
@@ -348,21 +305,17 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                   fontSize: context.font.small,
                 ),
                 onTap: () => Navigator.pushNamed(
-                        context, Routes.profileSettings, arguments: {
-                      'title': "termsConditions".translate(context),
-                      'param': Api.termsAndConditions
-                    })),
-            const SizedBox(
-              width: 5.0,
-            ),
+                    context, Routes.profileSettings, arguments: {
+                  'title': "termsConditions".translate(context),
+                  'param': Api.termsAndConditions
+                })),
+            const SizedBox(width: 5.0),
             CustomText(
               "andTxt".translate(context),
               color: context.color.textLightColor.withValues(alpha: 0.8),
               fontSize: context.font.small,
             ),
-            const SizedBox(
-              width: 5.0,
-            ),
+            const SizedBox(width: 5.0),
             InkWell(
                 child: CustomText(
                   "privacyPolicy".translate(context),
@@ -371,10 +324,10 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                   fontSize: context.font.small,
                 ),
                 onTap: () => Navigator.pushNamed(
-                        context, Routes.profileSettings, arguments: {
-                      'title': "privacyPolicy".translate(context),
-                      'param': Api.privacyPolicy
-                    })),
+                    context, Routes.profileSettings, arguments: {
+                  'title': "privacyPolicy".translate(context),
+                  'param': Api.privacyPolicy
+                })),
           ]),
         ],
       ),
