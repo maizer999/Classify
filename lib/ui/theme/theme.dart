@@ -11,7 +11,6 @@ const Color _backgroundColor = primaryColor_; //here you can change if you need
 const Color textDarkColor = Color(0xFF000000);
 Color lightTextColor = const Color(0xFF000000).withValues(alpha: 0.5);
 Color widgetsBorderColorLight = const Color(0xffEEEEEE).withValues(alpha: 0.6);
-//Color senderChatColor = const Color.fromARGB(255, 233, 233, 233).withValues(22);
 
 ///Dark Theme Colors
 Color primaryColorDark = const Color(0xff121212);
@@ -28,12 +27,7 @@ Color widgetsBorderColorDark = const Color(0x1aFDFDFD);
 Color orangeColor = Colors.orange;
 
 ///Messages Color
-const Color errorMessageColor = Color.fromARGB(
-  255,
-  166,
-  4,
-  4,
-); // Color(0xffeb5479)
+const Color errorMessageColor = Color.fromARGB(255, 166, 4, 4);
 const Color successMessageColor = Color(0xff00B2CA);
 const Color warningMessageColor = Color(0xFFC2AF6F);
 
@@ -45,6 +39,16 @@ const Color activateButtonColor = Color(0xFF02AD11);
 
 //Button text color
 const Color buttonTextColor = Colors.white;
+
+/// Modern Orange & Red Colors
+const Color modernOrangeLight = Color(0xFFFFA726);
+const Color modernOrangeDark = Color(0xFFFF7043);
+
+const Color modernRedLight = Color(0xFFEF5350);
+const Color modernRedDark = Color(0xFFD32F2F);
+
+const Color modernOrangeAccent = Color(0xFFFFCC80);
+const Color modernRedAccent = Color(0xFFFF8A80);
 
 ///Advance
 //Theme settings
@@ -69,8 +73,8 @@ extension ColorPrefs on ColorScheme {
 
   Color get territoryColor => _getColor(
     brightness,
-    lightColor: territoryColor_,
-    darkColor: territoryColorDark,
+    lightColor: forthColor_,
+    darkColor: forthColorDark,
   );
 
   Color get deactivateColor => _getColor(
@@ -136,6 +140,19 @@ extension ColorPrefs on ColorScheme {
   Color get shimmerContentColor => brightness == Brightness.light
       ? Colors.white.withValues(alpha: 0.85)
       : Colors.white.withValues(alpha: 0.7);
+
+  /// Modern Colors
+  Color get modernOrange =>
+      _getColor(brightness, lightColor: modernOrangeLight, darkColor: modernOrangeDark);
+
+  Color get modernRed =>
+      _getColor(brightness, lightColor: modernRedLight, darkColor: modernRedDark);
+
+  Color get modernOrangeAccent =>
+      _getColor(brightness, lightColor: modernOrangeAccent, darkColor: modernOrangeDark);
+
+  Color get modernRedAccent =>
+      _getColor(brightness, lightColor: modernRedAccent, darkColor: modernRedDark);
 }
 
 // 10pt: Smaller
@@ -148,8 +165,6 @@ extension TextThemeForFont on TextTheme {
 }
 
 /// i made this to access font easily from theme like, Theme.of(context).textTheme.font.small
-/// So what is difference here?? in Theme.of(context).textTheme.small and Theme.of(context).textTheme.font.small
-/// We use separate class because There will be an execution on BuildContext in [Utils/Extensions/lib] folder so further explanation is there. you can check
 class Font {
   ///10
   double get smaller => 10;
@@ -174,10 +189,10 @@ class Font {
 }
 
 Color _getColor(
-  Brightness brightness, {
-  required Color lightColor,
-  required Color darkColor,
-}) {
+    Brightness brightness, {
+      required Color lightColor,
+      required Color darkColor,
+    }) {
   if (Brightness.light == brightness) {
     return lightColor;
   } else {

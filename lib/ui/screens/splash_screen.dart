@@ -107,8 +107,8 @@ class SplashScreenState extends State<SplashScreen>
 
   void navigateToScreen() async {
     if (context.read<FetchSystemSettingsCubit>().getSetting(
-          SystemSetting.maintenanceMode,
-        ) ==
+      SystemSetting.maintenanceMode,
+    ) ==
         "1") {
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
@@ -118,7 +118,7 @@ class SplashScreenState extends State<SplashScreen>
     } else if (HiveUtils.isUserFirstTime()) {
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed(Routes.onboarding);
+          Navigator.of(context).pushReplacementNamed(Routes.login);
         }
       });
     } else if (HiveUtils.isUserAuthenticated()) {
@@ -136,20 +136,12 @@ class SplashScreenState extends State<SplashScreen>
         }
       });
     } else {
+      // **UPDATED LOGIC: Force login if not authenticated.**
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          if (HiveUtils.isUserSkip()) {
-            Navigator.of(context).pushReplacementNamed(
-              Routes.main,
-              arguments: {
-                'from': "main",
-                "slug": widget.itemSlug,
-                "sellerId": widget.sellerId,
-              },
-            );
-          } else {
-            Navigator.of(context).pushReplacementNamed(Routes.login);
-          }
+          // If the user is NOT authenticated, always go to login,
+          // overriding any previous 'skip' status.
+          Navigator.of(context).pushReplacementNamed(Routes.login);
         }
       });
     }
@@ -160,98 +152,99 @@ class SplashScreenState extends State<SplashScreen>
     navigateCheck();
     return hasInternet
         ? BlocListener<FetchLanguageCubit, FetchLanguageState>(
-            listener: (context, state) {
-              if (state is FetchLanguageSuccess) {
-                Map<String, dynamic> map = state.toMap();
+      listener: (context, state) {
+        if (state is FetchLanguageSuccess) {
+          Map<String, dynamic> map = state.toMap();
 
-                var data = map['file_name'];
-                map['data'] = data;
-                map.remove("file_name");
+          var data = map['file_name'];
+          map['data'] = data;
+          map.remove("file_name");
 
-                HiveUtils.storeLanguage(map);
-                context.read<LanguageCubit>().changeLanguages(map);
-                isLanguageLoaded = true;
-                if (mounted) {
-                  setState(() {});
-                }
-              }
-              if (state is FetchLanguageFailure) {
-                HelperUtils.showSnackBarMessage(context, state.errorMessage);
-              }
-            },
-            child:
-                BlocListener<
-                  FetchSystemSettingsCubit,
-                  FetchSystemSettingsState
-                >(
-                  listener: (context, state) {
-                    if (state is FetchSystemSettingsSuccess) {
-                      Constant.isDemoModeOn = context
-                          .read<FetchSystemSettingsCubit>()
-                          .getSetting(SystemSetting.demoMode);
-                      _getDefaultLanguage(
-                        defaultCode: state.settings['data']['default_language'],
-                        currentCode:
-                            state.settings['data']?['current_language'],
-                      );
-                      isSettingsLoaded = true;
-                      setState(() {});
-                    }
-                    if (state is FetchSystemSettingsFailure) {
-                      log('${state.errorMessage}');
-                    }
-                  },
-                  child: SafeArea(
-                    top: false,
-                    child: AnnotatedRegion(
-                      value: SystemUiOverlayStyle(
-                        statusBarColor: context.color.territoryColor,
-                        statusBarIconBrightness: Brightness.light,
-                        systemNavigationBarIconBrightness: Brightness.light,
-                        systemNavigationBarColor: context.color.territoryColor,
-                      ),
-                      child: Scaffold(
-                        backgroundColor: context.color.territoryColor,
-                        bottomNavigationBar: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0),
-                          child: UiUtils.getSvg(AppIcons.companyLogo),
-                        ),
-                        body: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              alignment: AlignmentDirectional.center,
-                              padding: EdgeInsets.only(top: 10.0),
-                              width: 150,
-                              height: 150,
-                              child: UiUtils.getSvg(AppIcons.splashLogo),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 10.0),
-                              child: CustomText(
-                                AppSettings.applicationName,
-                                fontSize: context.font.xxLarge,
-                                color: context.color.secondaryColor,
-                                textAlign: TextAlign.center,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+          HiveUtils.storeLanguage(map);
+          context.read<LanguageCubit>().changeLanguages(map);
+          isLanguageLoaded = true;
+          if (mounted) {
+            setState(() {});
+          }
+        }
+        if (state is FetchLanguageFailure) {
+          HelperUtils.showSnackBarMessage(context, state.errorMessage);
+        }
+      },
+      child:
+      BlocListener<
+          FetchSystemSettingsCubit,
+          FetchSystemSettingsState
+      >(
+        listener: (context, state) {
+          if (state is FetchSystemSettingsSuccess) {
+            Constant.isDemoModeOn = context
+                .read<FetchSystemSettingsCubit>()
+                .getSetting(SystemSetting.demoMode);
+            _getDefaultLanguage(
+              defaultCode: state.settings['data']['default_language'],
+              currentCode:
+              state.settings['data']?['current_language'],
+            );
+            isSettingsLoaded = true;
+            setState(() {});
+          }
+          if (state is FetchSystemSettingsFailure) {
+            log('${state.errorMessage}');
+          }
+        },
+        child: SafeArea(
+          top: false,
+          child: AnnotatedRegion(
+            value: SystemUiOverlayStyle(
+              statusBarColor: context.color.forthColor,
+              statusBarIconBrightness: Brightness.light,
+              systemNavigationBarIconBrightness: Brightness.light,
+              systemNavigationBarColor: context.color.territoryColor,
+            ),
+            child: Scaffold(
+              backgroundColor: context.color.forthColor,
+              bottomNavigationBar: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                // child: UiUtils.getSvg(AppIcons.companyLogo),
+                child: SizedBox(),
+              ),
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    alignment: AlignmentDirectional.center,
+                    padding: EdgeInsets.only(top: 10.0),
+                    width: 150,
+                    height: 150,
+                    child: UiUtils.getSvg(AppIcons.splashLogo),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: CustomText(
+                      AppSettings.applicationName,
+                      fontSize: context.font.xxLarge,
+                      color: context.color.secondaryColor,
+                      textAlign: TextAlign.center,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-          )
-        : Material(
-            child: Center(
-              child: NoInternet(
-                onRetry: () {
-                  setState(() {});
-                },
+                ],
               ),
             ),
-          );
+          ),
+        ),
+      ),
+    )
+        : Material(
+      child: Center(
+        child: NoInternet(
+          onRetry: () {
+            setState(() {});
+          },
+        ),
+      ),
+    );
   }
 }

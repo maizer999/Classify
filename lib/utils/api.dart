@@ -50,6 +50,12 @@ class Api {
   static const String getTwilioOtp = 'get-otp';
   static const String verifyTwilioOtp = 'verify-otp';
 
+  static const String sendOTPApi = "send-otp";
+  static const String verifyOTPApi = "verify-otp";
+  static const String registerEmailApi = "register-email";
+  static const String signUpApi = "user-signup";
+
+
   static String loginApi = "user-signup";
   static String updateProfileApi = "update-profile";
   static String userProfile = 'get-user-info';

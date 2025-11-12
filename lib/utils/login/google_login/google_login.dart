@@ -17,32 +17,49 @@ class GoogleLogin extends LoginSystem {
 
   @override
   Future<UserCredential?> login() async {
+    print("==> GoogleLogin.login() START");
     try {
       emit(MProgress());
+      print("==> Showing Google Sign-In prompt...");
+
       GoogleSignInAccount? googleSignIn = await _googleSignIn?.signIn();
+      print("==> GoogleSignIn returned: $googleSignIn");
+
       if (googleSignIn == null) {
-        emit(MFail("loginCancelledByUser".translate(Constant.navigatorKey.currentContext!)));
+        print("==> User cancelled Google Sign-In");
+        emit(MFail(
+          "loginCancelledByUser".translate(Constant.navigatorKey.currentContext!),
+        ));
         return null;
       }
 
-      GoogleSignInAuthentication? googleAuth =
-          await googleSignIn.authentication;
+      GoogleSignInAuthentication googleAuth = await googleSignIn.authentication;
+      print("==> Google authentication details: $googleAuth");
 
       AuthCredential authCredential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
+      print("==> Firebase AuthCredential created: $authCredential");
 
       UserCredential userCredential =
-          await firebaseAuth.signInWithCredential(authCredential);
+      await firebaseAuth.signInWithCredential(authCredential);
+      print("==> Firebase UserCredential: $userCredential");
+
       emit(MSuccess());
+      print("==> GoogleLogin.login() SUCCESS");
 
       return userCredential;
-    } catch (e) {
+    } catch (e, stack) {
+      print("==> GoogleLogin.login() ERROR: $e");
+      print(stack);
       emit(MFail(e.toString()));
-      return null; // or rethrow if you really want to handle it in UI
+      return null; // login failed
+    } finally {
+      print("==> GoogleLogin.login() END");
     }
   }
+
 
 
   void signOut() async {

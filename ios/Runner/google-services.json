@@ -14,14 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "416382625901-3tgt2sht17csfkemqoqhvigrhh5obsah.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.maizer.Classify",
-            "certificate_hash": "d7406651a98abc977bc86093093818d17e649cb8"
-          }
-        },
-        {
           "client_id": "416382625901-945q4rsg109fkuoj2onef5ncfoofudrd.apps.googleusercontent.com",
           "client_type": 3
         }

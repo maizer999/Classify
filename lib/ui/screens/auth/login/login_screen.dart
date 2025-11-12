@@ -436,7 +436,7 @@ class LoginScreenState extends State<LoginScreen> {
           keyboard: TextInputType.phone,
           validator: CustomTextFieldValidator.phoneNumber,
           fixedPrefix: SizedBox(
-            width: 55,
+            width: 60,
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: GestureDetector(

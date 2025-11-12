@@ -1,22 +1,36 @@
 import 'dart:io';
-
+// Removed: import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/constant.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+// --- Custom/Placeholder Types for Firebase types ---
+// These are defined in Api.dart now for simplicity
+class CustomAuthResult {
+  final String token;
+  final Map<String, dynamic> userData;
+  CustomAuthResult({required this.token, required this.userData});
+}
+
+class CustomVerificationId {
+  final String id;
+  CustomVerificationId(this.id);
+}
+// --------------------------------------------------
 
 class AuthRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  static int? forceResendingToken;
+  // Removed: final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Removed: static int? forceResendingToken;
 
-  Future<Map<String, dynamic>> numberLoginWithApi(
-      {String? phone,
-      required String uid,
-      required String type,
-      String? fcmId,
-      String? email,
-      String? name,
-      String? profile,
-      String? countryCode}) async {
+  Future<Map<String, dynamic>> numberLoginWithApi({
+    String? phone,
+    required String uid,
+    required String type,
+    String? fcmId,
+    String? email,
+    String? name,
+    String? profile,
+    String? countryCode,
+  }) async {
     Map<String, String> parameters = {
       if (phone != null) Api.mobile: phone,
       Api.firebaseId: uid,
@@ -26,74 +40,107 @@ class AuthRepository {
       if (email != null) Api.email: email,
       if (name != null) Api.name: name,
       if (countryCode != null) Api.countryCode: countryCode,
-
     };
-
     Map<String, dynamic> response = await Api.post(
       url: Api.loginApi,
       parameter: parameters,
     );
-
+    print("loginApi ${Api.loginApi}");
+    print("parameters ${parameters}");
+    print("response $response");
     return {"token": response['token'], "data": response['data']};
   }
 
   Future<dynamic> deleteUser() async {
-    Map<String, dynamic> response = await Api.delete(
-      url: Api.deleteUserApi,
-    );
-
+    Map<String, dynamic> response = await Api.delete(url: Api.deleteUserApi);
     return response;
   }
 
   void loginEmailUser() async {}
 
-  Future<void> sendOTP(
-      {required String phoneNumber,
-      required Function(String verificationId) onCodeSent,
-      Function(dynamic e)? onError}) async {
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      timeout: Duration(
-        seconds: Constant.otpTimeOutSecond,
-      ),
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        onError?.call(ApiException(e.code));
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        forceResendingToken = resendToken;
-        onCodeSent.call(verificationId);
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-      forceResendingToken: forceResendingToken,
-    );
+  /// Sends an OTP via a custom backend/SMS gateway (Uses placeholder API).
+  Future<CustomVerificationId> sendOTP({
+    required String phoneNumber,
+    required Function(String verificationId) onCodeSent,
+    Function(dynamic e)? onError,
+  }) async {
+    try {
+      Map<String, dynamic> response = await Api.post(
+        url: Api.sendOTPApi,
+        parameter: {
+          Api.mobile: phoneNumber,
+        },
+      );
+
+      String customVerificationId = response['verification_id'] ?? '';
+      if (customVerificationId.isEmpty) {
+        throw Exception("Failed to get verification ID from API.");
+      }
+
+      onCodeSent.call(customVerificationId);
+
+      return CustomVerificationId(customVerificationId);
+    } catch (e) {
+      onError?.call(e);
+      rethrow;
+    }
   }
 
-  Future<UserCredential> verifyOTP({
+  /// Verifies the OTP using a custom backend/SMS gateway (Uses placeholder API).
+  Future<CustomAuthResult> verifyOTP({
     required String otpVerificationId,
     required String otp,
   }) async {
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: otpVerificationId, smsCode: otp);
-    UserCredential userCredential =
-        await _auth.signInWithCredential(credential);
-    return userCredential;
+    try {
+      Map<String, dynamic> response = await Api.post(
+        url: Api.verifyOTPApi,
+        parameter: {
+          "verification_id": otpVerificationId,
+          "otp_code": otp,
+        },
+      );
+
+      String token = response['token'] ?? '';
+      Map<String, dynamic> userData = response['data'] ?? {};
+
+      return CustomAuthResult(token: token, userData: userData);
+    } catch (e) {
+      rethrow;
+    }
   }
 }
 
 class MultiAuthRepository {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
-  Future<UserCredential> createUserWithEmail(
-      {required String email, required String password}) async {
+  // The curl command matches a sign-up/registration flow,
+  // which replaces the Firebase email creation method.
+  Future<CustomAuthResult> createUserWithEmail({
+    required String firebaseId, // Renamed from uid to match parameter key
+    required String email,
+    // Password is not in your curl, but might be needed for your API later
+    String? password,
+    String? fcmId,
+  }) async {
     try {
-      UserCredential credentials =
-          await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+      // --- Custom Sign-up Logic using your CURL data ---
+      Map<String, String> parameters = {
+        Api.firebaseId: firebaseId,
+        Api.type: "email", // From curl: 'type=email'
+        Api.platformType: Platform.isAndroid ? "android" : "ios", // From curl
+        if (fcmId != null) Api.fcmId: fcmId,
+        Api.email: email,
+        // if (password != null) "password": password, // Add if needed
+      };
+
+      Map<String, dynamic> response = await Api.post(
+        url: Api.signUpApi, // Your new API endpoint
+        parameter: parameters,
       );
 
-      return credentials;
+      // Return a custom auth result object.
+      String token = response['token'] ?? '';
+      Map<String, dynamic> userData = response['data'] ?? {};
+      return CustomAuthResult(token: token, userData: userData);
+      // --- End Custom Sign-up Logic ---
     } catch (e) {
       rethrow;
     }
