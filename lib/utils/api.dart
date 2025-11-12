@@ -55,8 +55,12 @@ class Api {
   static const String registerEmailApi = "register-email";
   static const String signUpApi = "user-signup";
 
+  static const String loginWithGoogle = "loginWithGoogle";
 
-  static String loginApi = "user-signup";
+
+
+
+  static String loginApi = "login";
   static String updateProfileApi = "update-profile";
   static String userProfile = 'get-user-info';
   static String getSliderApi = "get-slider";
@@ -134,6 +138,8 @@ class Api {
   static String renewItem = 'renew-item';
   static String mobile = "mobile";
   static String type = "type";
+  static String password = "password";
+
   static String itemOfferId = "item_offer_id";
   static String flag = "flag";
   static String firebaseId = "firebase_id";

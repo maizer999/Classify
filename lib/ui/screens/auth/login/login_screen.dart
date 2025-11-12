@@ -347,6 +347,7 @@ class LoginScreenState extends State<LoginScreen> {
                     if (state.type == AuthenticationType.email) {
                       if (state.credential.user!.emailVerified) {
                         context.read<LoginCubit>().login(
+                          password: _passwordController.text,
                           phoneNumber: state.credential.user!.phoneNumber,
                           firebaseUserId: state.credential.user!.uid,
                           type: state.type.name,
@@ -357,6 +358,7 @@ class LoginScreenState extends State<LoginScreen> {
                     } else if (state.type == AuthenticationType.phone) {
                       if (Constant.otpServiceProvider == 'twilio') {
                         context.read<LoginCubit>().loginWithTwilio(
+                          password: _passwordController.text,
                           phoneNumber:
                               (state.payload as PhoneLoginPayload).phoneNumber,
                           firebaseUserId:
@@ -368,6 +370,7 @@ class LoginScreenState extends State<LoginScreen> {
                         );
                       } else {
                         context.read<LoginCubit>().login(
+                          password: _passwordController.text,
                           phoneNumber:
                               (state.payload as PhoneLoginPayload).phoneNumber,
                           firebaseUserId: state.credential.user!.uid,
@@ -380,6 +383,7 @@ class LoginScreenState extends State<LoginScreen> {
                     } else {
                       context.read<LoginCubit>().login(
                         phoneNumber: state.credential.user!.phoneNumber,
+                        password: _passwordController.text,
                         firebaseUserId: state.credential.user!.uid,
                         type: state.type.name,
                         credential: state.credential,

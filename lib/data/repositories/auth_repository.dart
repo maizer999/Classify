@@ -1,10 +1,6 @@
 import 'dart:io';
-// Removed: import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/constant.dart';
 
-// --- Custom/Placeholder Types for Firebase types ---
-// These are defined in Api.dart now for simplicity
 class CustomAuthResult {
   final String token;
   final Map<String, dynamic> userData;
@@ -15,17 +11,12 @@ class CustomVerificationId {
   final String id;
   CustomVerificationId(this.id);
 }
-// --------------------------------------------------
 
 class AuthRepository {
-  // Removed: final FirebaseAuth _auth = FirebaseAuth.instance;
-  // Removed: static int? forceResendingToken;
-
   Future<Map<String, dynamic>> numberLoginWithApi({
     String? phone,
-    required String uid,
     required String type,
-    String? fcmId,
+    required String password,
     String? email,
     String? name,
     String? profile,
@@ -33,10 +24,9 @@ class AuthRepository {
   }) async {
     Map<String, String> parameters = {
       if (phone != null) Api.mobile: phone,
-      Api.firebaseId: uid,
+      Api.password : password ,
       Api.type: type,
       Api.platformType: Platform.isAndroid ? "android" : "ios",
-      if (fcmId != null) Api.fcmId: fcmId,
       if (email != null) Api.email: email,
       if (name != null) Api.name: name,
       if (countryCode != null) Api.countryCode: countryCode,
@@ -56,9 +46,6 @@ class AuthRepository {
     return response;
   }
 
-  void loginEmailUser() async {}
-
-  /// Sends an OTP via a custom backend/SMS gateway (Uses placeholder API).
   Future<CustomVerificationId> sendOTP({
     required String phoneNumber,
     required Function(String verificationId) onCodeSent,
@@ -86,7 +73,6 @@ class AuthRepository {
     }
   }
 
-  /// Verifies the OTP using a custom backend/SMS gateway (Uses placeholder API).
   Future<CustomAuthResult> verifyOTP({
     required String otpVerificationId,
     required String otp,
@@ -111,36 +97,33 @@ class AuthRepository {
 }
 
 class MultiAuthRepository {
-  // The curl command matches a sign-up/registration flow,
-  // which replaces the Firebase email creation method.
   Future<CustomAuthResult> createUserWithEmail({
-    required String firebaseId, // Renamed from uid to match parameter key
     required String email,
-    // Password is not in your curl, but might be needed for your API later
     String? password,
     String? fcmId,
   }) async {
     try {
-      // --- Custom Sign-up Logic using your CURL data ---
       Map<String, String> parameters = {
-        Api.firebaseId: firebaseId,
-        Api.type: "email", // From curl: 'type=email'
-        Api.platformType: Platform.isAndroid ? "android" : "ios", // From curl
+        Api.password : password ?? "" ,
+        Api.type: "email",
+        Api.platformType: Platform.isAndroid ? "android" : "ios",
         if (fcmId != null) Api.fcmId: fcmId,
         Api.email: email,
-        // if (password != null) "password": password, // Add if needed
       };
 
       Map<String, dynamic> response = await Api.post(
-        url: Api.signUpApi, // Your new API endpoint
+        url: Api.signUpApi,
         parameter: parameters,
       );
 
-      // Return a custom auth result object.
+      if (response['error'] != null && response['error'] == true) {
+        throw Exception("API Error: ${response['message']}");
+      }
+
       String token = response['token'] ?? '';
       Map<String, dynamic> userData = response['data'] ?? {};
+
       return CustomAuthResult(token: token, userData: userData);
-      // --- End Custom Sign-up Logic ---
     } catch (e) {
       rethrow;
     }
