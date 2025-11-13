@@ -7,6 +7,7 @@ import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
 import 'package:eClassify/data/cubits/system/language_cubit.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/globals.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/notification/notification_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';

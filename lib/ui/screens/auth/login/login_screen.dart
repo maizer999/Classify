@@ -321,7 +321,7 @@ class LoginScreenState extends State<LoginScreen> {
                     HiveUtils.setUserIsAuthenticated(true);
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       Routes.locationPermissionScreen,
-                      (route) => false,
+                          (route) => false,
                     );
                   } else {
                     Navigator.pushNamed(
@@ -358,23 +358,23 @@ class LoginScreenState extends State<LoginScreen> {
                       if (Constant.otpServiceProvider == 'twilio') {
                         context.read<LoginCubit>().loginWithTwilio(
                           phoneNumber:
-                              (state.payload as PhoneLoginPayload).phoneNumber,
+                          (state.payload as PhoneLoginPayload).phoneNumber,
                           firebaseUserId:
-                              state.credential['id']?.toString() ?? '',
+                          state.credential['id']?.toString() ?? '',
                           type: state.type.name,
                           credential: state.credential,
                           countryCode:
-                              "+${(state.payload as PhoneLoginPayload).countryCode}",
+                          "+${(state.payload as PhoneLoginPayload).countryCode}",
                         );
                       } else {
                         context.read<LoginCubit>().login(
                           phoneNumber:
-                              (state.payload as PhoneLoginPayload).phoneNumber,
+                          (state.payload as PhoneLoginPayload).phoneNumber,
                           firebaseUserId: state.credential.user!.uid,
                           type: state.type.name,
                           credential: state.credential,
                           countryCode:
-                              "+${(state.payload as PhoneLoginPayload).countryCode}",
+                          "+${(state.payload as PhoneLoginPayload).countryCode}",
                         );
                       }
                     } else {
@@ -436,7 +436,7 @@ class LoginScreenState extends State<LoginScreen> {
           keyboard: TextInputType.phone,
           validator: CustomTextFieldValidator.phoneNumber,
           fixedPrefix: SizedBox(
-            width: 55,
+            width: 60,
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: GestureDetector(
@@ -555,7 +555,7 @@ class LoginScreenState extends State<LoginScreen> {
               buttonTitle: 'signIn'.translate(context),
               radius: 10,
               disabled:
-                  emailController.text.isEmpty ||
+              emailController.text.isEmpty ||
                   _passwordController.text.isEmpty,
               disabledColor: const Color.fromARGB(255, 104, 102, 106),
             );
@@ -601,7 +601,7 @@ class LoginScreenState extends State<LoginScreen> {
                   onTap: () {
                     Navigator.pushReplacementNamed(
                       context,
-                      Routes.signupMainScreen,
+                      Routes.twoStepSignupScreen,
                     );
                   },
                   child: CustomText(
@@ -644,8 +644,8 @@ class LoginScreenState extends State<LoginScreen> {
           buttonColor: secondaryColor_,
           border: !context.read<AppThemeCubit>().isDarkMode()
               ? BorderSide(
-                  color: context.color.textDefaultColor.withValues(alpha: 0.5),
-                )
+            color: context.color.textDefaultColor.withValues(alpha: 0.5),
+          )
               : null,
           textColor: textDarkColor,
 
@@ -689,8 +689,8 @@ class LoginScreenState extends State<LoginScreen> {
           buttonColor: secondaryColor_,
           border: !context.read<AppThemeCubit>().isDarkMode()
               ? BorderSide(
-                  color: context.color.textDefaultColor.withValues(alpha: 0.5),
-                )
+            color: context.color.textDefaultColor.withValues(alpha: 0.5),
+          )
               : null,
           textColor: textDarkColor,
           onPressed: () {
@@ -728,16 +728,16 @@ class LoginScreenState extends State<LoginScreen> {
               textColor: textDarkColor,
               border: !context.read<AppThemeCubit>().isDarkMode()
                   ? BorderSide(
-                      color: context.color.textDefaultColor.withValues(
-                        alpha: 0.5,
-                      ),
-                    )
+                color: context.color.textDefaultColor.withValues(
+                  alpha: 0.5,
+                ),
+              )
                   : null,
               height: 46,
               radius: 8,
               buttonTitle:
-                  (isMobileField ? 'continueWithEmail' : 'continueWithMobile')
-                      .translate(context),
+              (isMobileField ? 'continueWithEmail' : 'continueWithMobile')
+                  .translate(context),
             );
           },
         ),
@@ -898,23 +898,23 @@ class LoginScreenState extends State<LoginScreen> {
             alignment: AlignmentDirectional.centerEnd,
             child: isResendEnabled
                 ? MaterialButton(
-                    onPressed: () {
-                      context.read<AuthenticationCubit>().setData(
-                        payload: phoneLoginPayload,
-                        type: AuthenticationType.phone,
-                      );
-                      context.read<AuthenticationCubit>().verify();
-                      startResendOtpTimer();
-                    },
-                    child: CustomText(
-                      "resendOTP".translate(context),
-                      color: context.color.territoryColor,
-                    ),
-                  )
+              onPressed: () {
+                context.read<AuthenticationCubit>().setData(
+                  payload: phoneLoginPayload,
+                  type: AuthenticationType.phone,
+                );
+                context.read<AuthenticationCubit>().verify();
+                startResendOtpTimer();
+              },
+              child: CustomText(
+                "resendOTP".translate(context),
+                color: context.color.territoryColor,
+              ),
+            )
                 : CustomText(
-                    "${"resendOtpIn".translate(context)} 0:${_start.toString().padLeft(2, '0')}",
-                    color: context.color.textColorDark.withValues(alpha: 0.7),
-                  ),
+              "${"resendOtpIn".translate(context)} 0:${_start.toString().padLeft(2, '0')}",
+              color: context.color.textColorDark.withValues(alpha: 0.7),
+            ),
           ),
           const SizedBox(height: 19),
           UiUtils.buildButton(

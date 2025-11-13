@@ -1,3 +1,4 @@
+import 'package:eClassify/data/repositories/two_step_signup_screen.dart';
 import 'package:eClassify/ui/screens/ad_details_screen.dart';
 import 'package:eClassify/ui/screens/advertisement/my_advertisment_screen.dart';
 import 'package:eClassify/ui/screens/auth/login/forgot_password.dart';
@@ -63,6 +64,8 @@ class Routes {
   static const String forgotPassword = 'forgotPassword';
   static const String signup = 'signup';
   static const String signupMainScreen = 'signUpMainScreen';
+  static const String twoStepSignupScreen = 'two_step_signup_screen';
+
   static const String mobileSignUp = 'mobileSignUp';
   static const String completeProfile = 'complete_profile';
 
@@ -219,6 +222,10 @@ class Routes {
         return ForgotPasswordScreen.route(routeSettings);
       case signup:
         return SignupScreen.route(routeSettings);
+
+      case twoStepSignupScreen:
+        return MaterialPageRoute(builder: (_) => const TwoStepSignupScreen());
+
       case signupMainScreen:
         return SignUpMainScreen.route(routeSettings);
       case mobileSignUp:

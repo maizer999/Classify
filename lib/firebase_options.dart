@@ -52,8 +52,8 @@ class DefaultFirebaseOptions {
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'YOUR_API_KEY_HERE',
     appId: '1:6343732161:android:be9cbc67ef8a19792b5d40',
-    messagingSenderId: '6343732161',
-    projectId: 'eclassify-wrteam',
+    messagingSenderId: '416382625901',
+    projectId: 'classify-26e2c',
     storageBucket: 'eclassify-wrteam.firebasestorage.app',
   );
 
