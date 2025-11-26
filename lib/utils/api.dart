@@ -49,8 +49,9 @@ class Api {
   //Twilio API
   static const String getTwilioOtp = 'get-otp';
   static const String verifyTwilioOtp = 'verify-otp';
-
   static String loginApi = "user-signup";
+
+  static String userSignupApi = "signup-two-step";
   static String updateProfileApi = "update-profile";
   static String userProfile = 'get-user-info';
   static String getSliderApi = "get-slider";
@@ -137,6 +138,7 @@ class Api {
   static String clientAddress = "client_address";
   static String email = "email";
   static String name = "name";
+  static String password = "password";
   static String amount = "amount";
   static String error = "error";
   static String message = "message";

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:eClassify/data/repositories/auth_repository.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
@@ -27,48 +28,39 @@ class _TwoStepSignupScreenState extends State<TwoStepSignupScreen> {
   final passwordController = TextEditingController();
   final nameController = TextEditingController();
   final mobileController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+
+  // 💡 NEW: Separate GlobalKeys for each step
+  final _formKeyStep1 = GlobalKey<FormState>();
+  final _formKeyStep2 = GlobalKey<FormState>();
 
   Future<void> completeSignup() async {
-    if (!_formKey.currentState!.validate()) return;
     setState(() => isLoading = true);
 
     try {
-      final response = await http.post(
-        Uri.parse("${Api}/signup-two-step"),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "email": emailController.text.trim(),
-          "password": passwordController.text.trim(),
-          "name": nameController.text.trim(),
-          "mobile": mobileController.text.trim(),
-        }),
+      final MultiAuthRepository _authRepo = MultiAuthRepository();
+      final response = await _authRepo.twoStepSignupWithApi(
+        email: emailController.text,
+        password: passwordController.text,
+        name: nameController.text,
+        mobile: mobileController.text,
       );
 
-      final data = jsonDecode(response.body);
       setState(() => isLoading = false);
 
-      if (response.statusCode == 200 && data["status"] == 200) {
-        HelperUtils.showSnackBarMessage(
-          context,
-          data["message"] ?? "Signup successful!",
-        );
-        Navigator.pushReplacementNamed(context, Routes.login);
-      } else {
-        HelperUtils.showSnackBarMessage(
-          context,
-          data["message"] ?? "Something went wrong",
-          type: MessageType.error,
-        );
-      }
-    } catch (e) {
-      setState(() => isLoading = false);
       HelperUtils.showSnackBarMessage(
         context,
-        "Network error. Please try again.",
+        response["message"] ?? "Signup successful!",
+      );
+      Navigator.pushReplacementNamed(context, Routes.login);
+
+    } catch (e) {
+      setState(() => isLoading = false);
+
+      String errorMessage = "Network error. Please try again.";
+
+      HelperUtils.showSnackBarMessage(
+        context,
+        errorMessage,
         type: MessageType.error,
       );
     }
@@ -79,7 +71,6 @@ class _TwoStepSignupScreenState extends State<TwoStepSignupScreen> {
     return WillPopScope(
       onWillPop: () async {
         if (showExtraFields) {
-          // Go back to step 1 instead of exiting
           setState(() => showExtraFields = false);
           return false;
         }
@@ -91,110 +82,124 @@ class _TwoStepSignupScreenState extends State<TwoStepSignupScreen> {
         statusBarColor: context.color.backgroundColor,
         child: Scaffold(
           backgroundColor: context.color.backgroundColor,
-          appBar: AppBar(
-            backgroundColor: context.color.backgroundColor,
-            title: CustomText(
-              "signUp".translate(context),
-              fontSize: context.font.large,
-              color: context.color.textDefaultColor,
+
+          // ---------- Custom Header ----------
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(100),
+            child: Container(
+              padding: const EdgeInsets.only(top: 50, left: 20, right: 20),
+              decoration: BoxDecoration(
+                color: context.color.secondaryColor.withOpacity(0.07),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(30),
+                ),
+              ),
+              child: Center(
+                child: CustomText(
+                  "Sign Up".translate(context),
+                  fontSize: context.font.extraLarge,
+                  fontWeight: FontWeight.w600,
+                  color: context.color.textDefaultColor,
+                ),
+              ),
             ),
           ),
+
+          // ---------- BODY ----------
           body: Padding(
             padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(
-                      "x".translate(context),
-                      fontSize: context.font.extraLarge,
-                      color: context.color.textDefaultColor,
-                    ),
-                    const SizedBox(height: 24),
-
-                    /// Step 1 Fields
-                    CustomTextFormField(
-                      controller: emailController,
-                      hintText: "emailAddress".translate(context),
-                      keyboard: TextInputType.emailAddress,
-                      validator: CustomTextFieldValidator.email,
-                    ),
-                    const SizedBox(height: 16),
-
-                    CustomTextFormField(
-                      controller: passwordController,
-                      hintText: "password".translate(context),
-                      obscureText: isObscure,
-                      validator: CustomTextFieldValidator.nullCheck,
-                      suffix: IconButton(
-                        icon: Icon(
-                          isObscure ? Icons.visibility_off : Icons.visibility,
-                          color: context.color.textLightColor.withValues(alpha: 0.4),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Step 1 Fields wrapped in its own Form
+                  Form(
+                    key: _formKeyStep1, // 🔑 Using Step 1 Key
+                    child: Column(
+                      children: [
+                        CustomTextFormField(
+                          controller: emailController,
+                          hintText: "Email Address".translate(context),
+                          keyboard: TextInputType.emailAddress,
+                          validator: CustomTextFieldValidator.email,
                         ),
-                        onPressed: () => setState(() => isObscure = !isObscure),
-                      ),
+                        const SizedBox(height: 16),
+
+                        CustomTextFormField(
+                          controller: passwordController,
+                          hintText: "Password".translate(context),
+                          obscureText: isObscure,
+                          validator: CustomTextFieldValidator.nullCheck,
+                          suffix: IconButton(
+                            icon: Icon(
+                              isObscure ? Icons.visibility_off : Icons.visibility,
+                              color: context.color.textLightColor.withValues(alpha: 0.4),
+                            ),
+                            onPressed: () => setState(() => isObscure = !isObscure),
+                          ),
+                        ),
+                        const SizedBox(height: 25),
+                      ],
                     ),
-                    const SizedBox(height: 20),
+                  ),
 
-                    if (!showExtraFields)
-                      UiUtils.buildButton(
-                        context,
-                        buttonTitle: "continue".translate(context),
-                        radius: 10,
-                        onPressed: () {
-                          if (!_formKey.currentState!.validate()) return;
-                          setState(() => showExtraFields = true);
-                          HelperUtils.showSnackBarMessage(
-                            context,
-                            "Please complete your profile details.",
-                          );
-                        },
-                      ),
+                  if (!showExtraFields)
+                    UiUtils.buildButton(
+                      context,
+                      buttonTitle: "Continue".translate(context),
+                      radius: 12,
+                      onPressed: () {
+                        // 🔑 Validates ONLY Step 1 fields
+                        if (!_formKeyStep1.currentState!.validate()) return;
+                        setState(() => showExtraFields = true);
+                        HelperUtils.showSnackBarMessage(
+                          context,
+                          "Please complete your profile details.",
+                        );
+                      },
+                    ),
 
-                    /// Step 2 Fields
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: showExtraFields
-                          ? Column(
+                  // Step 2 Fields (with animated transition)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: showExtraFields
+                        ? Form( // 🔑 Form for Step 2
+                      key: _formKeyStep2,
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const SizedBox(height: 20),
+
                           CustomTextFormField(
                             controller: nameController,
-                            hintText: "fullName".translate(context),
+                            hintText: "Full Name".translate(context),
                             validator: CustomTextFieldValidator.nullCheck,
                           ),
                           const SizedBox(height: 16),
 
                           CustomTextFormField(
                             controller: mobileController,
-                            hintText: "mobileNumberLbl".translate(context),
+                            hintText: "Mobile Number".translate(context),
                             keyboard: TextInputType.phone,
                             validator: CustomTextFieldValidator.phoneNumber,
                           ),
                           const SizedBox(height: 30),
 
-                          /// Finish Signup (Apple-style button)
                           UiUtils.buildButton(
                             context,
-                            buttonTitle: "submit".translate(context),
-                            radius: 10,
+                            buttonTitle: "Submit".translate(context),
+                            radius: 12,
                             onPressed: () {
-                              if (!_formKey.currentState!.validate()) return;
-                              setState(() => showExtraFields = true);
-                              HelperUtils.showSnackBarMessage(
-                                context,
-                                "Please complete your profile details.",
-                              );
+                              if (!_formKeyStep2.currentState!.validate()) return;
+                              completeSignup();
                             },
                           ),
                         ],
-                      )
-                          : const SizedBox.shrink(),
-                    ),
-                  ],
-                ),
+                      ),
+                    )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
               ),
             ),
           ),
