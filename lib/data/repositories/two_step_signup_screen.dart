@@ -108,7 +108,7 @@ class _TwoStepSignupScreenState extends State<TwoStepSignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      "createYourAccount".translate(context),
+                      "x".translate(context),
                       fontSize: context.font.extraLarge,
                       color: context.color.textDefaultColor,
                     ),

@@ -46,6 +46,8 @@ class CategoryHomeCard extends StatelessWidget {
           // Added a small, explicit vertical spacer between the image and the text.
           const SizedBox(height: 4),
 
+
+
           // 🚨 FIX 3: Removed the Expanded around CustomText.
           // Text should take only the height it needs. The image container (Expanded above)
           // will take the rest, guaranteeing no overflow.

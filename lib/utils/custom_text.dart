@@ -40,9 +40,18 @@ class CustomText extends StatelessWidget {
   final bool firstUpperCaseWidget;
 
   TextStyle textStyle(BuildContext context) {
+
     return TextStyle(
+      fontFamily: 'NotoKufiArabic-Bold',
+      fontWeight: FontWeight.w400,
+      fontSize: 20,
+    );
+
+
+    return TextStyle(
+      fontFamily: 'NotoKufiArabic-Regular',
       color: color ?? context.color.textDefaultColor,
-      fontWeight: fontWeight,
+      fontWeight: fontWeight ?? FontWeight.w400,
       fontStyle: fontStyle,
       fontSize: fontSize,
       decoration: showLineThrough ?? false
