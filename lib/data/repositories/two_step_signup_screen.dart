@@ -1,16 +1,12 @@
-import 'dart:convert';
 import 'package:eClassify/data/repositories/auth_repository.dart';
-import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:http/http.dart' as http;
 
 class TwoStepSignupScreen extends StatefulWidget {
   const TwoStepSignupScreen({Key? key}) : super(key: key);

@@ -12,7 +12,6 @@ import 'package:eClassify/utils/login/lib/login_status.dart';
 import 'package:eClassify/utils/login/lib/login_system.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:eClassify/utils/login/phone_login/phone_login.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Enum representing different authentication types
@@ -103,9 +102,6 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       } else {
         await _handleStandardAuthentication();
       }
-    } on FirebaseAuthException catch (e) {
-      print("firebase error***${e.code.toString()}***${e.message.toString()}");
-      _handleFirebaseAuthError(e);
     } catch (e, stack) {
       print("error auth***${e.toString()}");
       _handleGeneralError(e, stack);
@@ -141,8 +137,14 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
   /// Handles standard authentication flow
   Future<void> _handleStandardAuthentication() async {
+    // Assuming 'login' is the method that performs the login request
+    log("Starting authentication for type: ${type!.name}");
+
     final credential = await mMultiAuthentication.login();
-    if (credential == null) return;
+    // if (credential == null) return;
+
+    // Log the response or other parameters as needed
+    log("Authentication response: $credential");
 
     if (_isEmailLoginWithUnverifiedEmail(credential)) {
       _handleUnverifiedEmail();
@@ -152,11 +154,9 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   }
 
   /// Checks if the current login is an unverified email login
-  bool _isEmailLoginWithUnverifiedEmail(UserCredential credential) {
+  bool _isEmailLoginWithUnverifiedEmail(dynamic credential) {
     return payload is EmailLoginPayload &&
-        (payload as EmailLoginPayload).type == EmailLoginType.login &&
-        credential.user != null &&
-        !credential.user!.emailVerified;
+        (payload as EmailLoginPayload).type == EmailLoginType.login;
   }
 
   /// Handles unverified email case
@@ -164,13 +164,6 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
     emit(AuthenticationFail(
       "pleaseVerifyYourEmail".translate(Constant.navigatorKey.currentContext!),
     ));
-  }
-
-  /// Handles Firebase authentication errors
-  void _handleFirebaseAuthError(FirebaseAuthException e) {
-    log(e.toString());
-    emit(AuthenticationFail(
-        ErrorFilter.getErrorKeyFromFirebaseAuthException(e)));
   }
 
   /// Handles general errors
@@ -210,18 +203,6 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
   /// Signs out the current user
   Future<void> signOut() async {
-    if (state is AuthenticationSuccess) {
-      final authType = (state as AuthenticationSuccess).type;
-
-      await FirebaseAuth.instance.signOut();
-
-      if (authType == AuthenticationType.google) {
-        final googleLogin =
-            mMultiAuthentication.systems['google'] as GoogleLogin;
-        googleLogin.signOut();
-      }
-
-      emit(const AuthenticationInitial());
-    }
+    emit(const AuthenticationInitial());
   }
 }
