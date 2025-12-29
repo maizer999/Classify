@@ -85,16 +85,16 @@ class DiamondFab extends StatelessWidget {
 
     return BlocListener<FetchUserPackageLimitCubit, FetchUserPackageLimitState>(
       listener: (context, state) {
-        if (state is FetchUserPackageLimitFailure) {
-          UiUtils.noPackageAvailableDialog(context);
-        }
-        if (state is FetchUserPackageLimitInSuccess) {
+        // if (state is FetchUserPackageLimitFailure) {
+        //   UiUtils.noPackageAvailableDialog(context);
+        // }
+        // if (state is FetchUserPackageLimitInSuccess) {
           Navigator.pushNamed(
             context,
             Routes.selectCategoryScreen,
             arguments: <String, dynamic>{},
           );
-        }
+        // }
       },
       child: child,
     );

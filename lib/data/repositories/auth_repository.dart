@@ -8,34 +8,36 @@ class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static int? forceResendingToken;
 
-  Future<Map<String, dynamic>> numberLoginWithApi(
-      {String? phone,
-      required String uid,
-      required String type,
-      String? fcmId,
-      String? email,
-      String? name,
-      String? profile,
-      String? countryCode}) async {
-    Map<String, String> parameters = {
-      if (phone != null) Api.mobile: phone,
-      Api.firebaseId: uid,
-      Api.type: type,
-      Api.platformType: Platform.isAndroid ? "android" : "ios",
-      if (fcmId != null) Api.fcmId: fcmId,
-      if (email != null) Api.email: email,
-      if (name != null) Api.name: name,
-      if (countryCode != null) Api.countryCode: countryCode,
+  Future<Map<String, dynamic>> numberLoginWithApi({
+    String? phone,
+    required String type,
+    required String uid,
+    required String fcmId,
+    String? email,
+    String? name,
+    String? profile,
+    String? countryCode,
+  }) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
 
+    // Return static/fake user data
+    return {
+      'status': true,
+      'message': 'Login successful',
+      'data': {
+        'user_id': 123,
+        'name': name ?? 'Test User',
+        'phone': phone ?? '+1234567890',
+        'email': email ?? 'test@example.com',
+        'profile': profile ?? '',
+        'country_code': countryCode ?? '+1',
+        'token': 'static_fake_token_123',
+        'isProfileCompleted': true,
+      },
     };
-
-    Map<String, dynamic> response = await Api.post(
-      url: Api.loginApi,
-      parameter: parameters,
-    );
-
-    return {"token": response['token'], "data": response['data']};
   }
+
 
   Future<dynamic> deleteUser() async {
     Map<String, dynamic> response = await Api.delete(

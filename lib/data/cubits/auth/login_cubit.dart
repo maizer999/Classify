@@ -89,7 +89,7 @@ class LoginCubit extends Cubit<LoginState> {
         phone: phoneNumber ?? credential.user!.providerData[0].phoneNumber,
         type: type,
         uid: firebaseUserId,
-        fcmId: token,
+        fcmId: "token",
         email: credential.user!.providerData[0].email,
         name: name,
         profile: credential.user!.providerData[0].photoURL,
@@ -123,7 +123,7 @@ class LoginCubit extends Cubit<LoginState> {
         phone: phoneNumber,
         type: type,
         uid: firebaseUserId,
-        fcmId: token,
+        fcmId: "token",
         email: null,
         name: null,
         profile: null,
@@ -167,24 +167,29 @@ class LoginCubit extends Cubit<LoginState> {
 
   /// Handles login response
   Future<void> _handleLoginResponse(
-    Map<String, dynamic> result,
-    dynamic credential,
-  ) async {
-    HiveUtils.setJWT(result['token']);
+      Map<String, dynamic> result, dynamic credential) async {
+    // Save token
+    // HiveUtils.setJWT(result['data']['token']);
+    HiveUtils.setJWT('Bearer fake_token_123');
+
+    // Save user data
     final data = result['data'];
-    final isProfileCompleted = _isProfileCompleted(data);
+    final isProfileCompleted = data['isProfileCompleted'] ?? true;
 
     if (!isProfileCompleted) {
       HiveUtils.setProfileNotCompleted();
     }
 
     HiveUtils.setUserData(data);
+
+    // Emit success with credential
     emit(LoginSuccess(
       apiResponse: Map<String, dynamic>.from(data),
       isProfileCompleted: isProfileCompleted,
       credential: credential,
     ));
   }
+
 
   /// Handles Twilio login response
   Future<void> _handleTwilioLoginResponse(Map<String, dynamic> credential) async {
